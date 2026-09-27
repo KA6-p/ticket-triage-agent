@@ -1,0 +1,11 @@
+subject,body,category
+Refund requested,I was charged twice and need a refund.,billing
+Cannot log in,I reset my password but still cannot login.,account
+App crashes,The mobile app crashes whenever I open settings.,bug
+Export feature,Please add CSV export to the reporting page.,feature_request
+General question,Where can I find your documentation?,other
+Payment failed,My card payment was declined but money was held.,billing
+Password locked,My account is locked after too many attempts.,account
+API error,The API returns a 500 error on valid requests.,bug
+Dark mode,Could you add a dark mode option?,feature_request
+Contact support,How do I contact the support team?,other
