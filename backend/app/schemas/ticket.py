@@ -38,6 +38,21 @@ class TicketOut(BaseModel):
         from_attributes = True
 
 class FeedbackCreate(BaseModel):
+    correct: bool = False
+
     corrected_category: Category | None = None
+
     corrected_priority: Priority | None = None
-    corrected_by: str = 'human'
+
+    corrected_sentiment: Sentiment | None = None
+
+    corrected_by: str = Field(
+        default="human",
+        min_length=1,
+        max_length=100,
+    )
+
+    notes: str | None = Field(
+        default=None,
+        max_length=2000,
+    )
