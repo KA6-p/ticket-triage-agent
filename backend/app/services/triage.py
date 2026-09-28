@@ -1,11 +1,11 @@
 import json
 
-
 from google import genai
-from google.genai import errors
+from pydantic import ValidationError
 
 from ..config import settings
 from ..prompts.triage import SYSTEM_PROMPT
+from ..schemas.ticket import TriageResult
 
 
 class TriageService:
@@ -16,7 +16,7 @@ class TriageService:
             else None
         )
 
-    def _fallback(self):
+    def _fallback(self) -> dict:
         return {
             "category": "other",
             "priority": "medium",
@@ -24,15 +24,32 @@ class TriageService:
             "confidence": 0.0,
             "suggested_team": "Human Review",
             "draft_reply": (
-                "Thank you for contacting support. "
-                "Your request has been received and will be "
-                "reviewed by a human support agent."
+                "Thank you for contacting support. Your request has been "
+                "received and will be reviewed by a human support agent."
             ),
         }
 
-    def classify(self, subject: str, body: str) -> dict:
+    def _parse_and_validate(self, raw: str) -> dict:
+        raw = raw.strip()
 
-        # No API key
+        # Remove markdown code fences if the model adds them.
+        if raw.startswith("```"):
+            raw = raw.replace("```json", "", 1)
+            raw = raw.replace("```", "", 1).strip()
+
+        try:
+            data = json.loads(raw)
+        except json.JSONDecodeError:
+            return self._fallback()
+
+        try:
+            result = TriageResult.model_validate(data)
+        except ValidationError:
+            return self._fallback()
+
+        return result.model_dump()
+
+    def classify(self, subject: str, body: str) -> dict:
         if not self.client:
             return self._fallback()
 
@@ -54,28 +71,12 @@ Body:
                 contents=prompt,
             )
 
-            raw = response.text.strip()
+            raw = response.text
 
-            if raw.startswith("```"):
-                raw = (
-                    raw.replace("```json", "")
-                    .replace("```", "")
-                    .strip()
-                )
+            if not raw:
+                return self._fallback()
 
-            return json.loads(raw)
+            return self._parse_and_validate(raw)
 
-        except errors.ClientError as exc:
-            # Handles 429 quota errors and other Gemini API errors.
-            print(f"Gemini API error: {exc}")
-            return self._fallback()
-
-        except errors.ServerError as exc:
-            # Handles temporary Gemini server failures.
-            print(f"Gemini server error: {exc}")
-            return self._fallback()
-
-        except json.JSONDecodeError as exc:
-            # Gemini returned something that was not valid JSON.
-            print(f"Gemini JSON parsing error: {exc}")
+        except Exception:
             return self._fallback()
