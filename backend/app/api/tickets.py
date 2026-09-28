@@ -10,7 +10,6 @@ from ..models import Feedback, Ticket
 from ..schemas.ticket import FeedbackCreate, TicketCreate, TicketOut
 from ..services.pipeline import process_ticket
 
-
 router = APIRouter(
     prefix="/tickets",
     tags=["tickets"],

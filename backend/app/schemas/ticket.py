@@ -1,15 +1,18 @@
 from datetime import datetime
-from pydantic import BaseModel, Field
 from typing import Literal
 
-Category = Literal['billing','bug','feature_request','account','other']
-Priority = Literal['low','medium','high','critical']
-Sentiment = Literal['frustrated','neutral','positive']
+from pydantic import BaseModel, Field
+
+Category = Literal["billing", "bug", "feature_request", "account", "other"]
+Priority = Literal["low", "medium", "high", "critical"]
+Sentiment = Literal["frustrated", "neutral", "positive"]
+
 
 class TicketCreate(BaseModel):
-    source: str = 'api'
+    source: str = "api"
     subject: str = Field(min_length=1, max_length=500)
     body: str = Field(min_length=1)
+
 
 class TriageResult(BaseModel):
     category: Category
@@ -18,6 +21,7 @@ class TriageResult(BaseModel):
     confidence: float = Field(ge=0, le=1)
     suggested_team: str
     draft_reply: str
+
 
 class TicketOut(BaseModel):
     id: int
@@ -34,8 +38,10 @@ class TicketOut(BaseModel):
     status: str
     embedding_id: str | None
     duplicate_of: int | None
+
     class Config:
         from_attributes = True
+
 
 class FeedbackCreate(BaseModel):
     correct: bool = False

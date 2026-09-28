@@ -1,7 +1,7 @@
 import os
+
 import requests
 import streamlit as st
-
 
 # ============================================================
 # Configuration
@@ -34,6 +34,7 @@ PRIORITY_DOTS = {
 # ============================================================
 # API helper
 # ============================================================
+
 
 def api(path, method="get", **kwargs):
     response = requests.request(method, API + path, timeout=120, **kwargs)
@@ -327,6 +328,7 @@ st.markdown(
 # Small render helpers
 # ============================================================
 
+
 def render_kpis(items):
     cards = "".join(
         f'<div class="kpi-card"><div class="kpi-value">{value}</div>'
@@ -371,7 +373,9 @@ def render_stats(items):
 # Header
 # ============================================================
 
-st.markdown('<div class="app-title">🎫 Ticket Triage Agent</div>', unsafe_allow_html=True)
+st.markdown(
+    '<div class="app-title">🎫 Ticket Triage Agent</div>', unsafe_allow_html=True
+)
 st.markdown(
     '<div class="app-caption">LLM classification, deterministic guardrails, semantic '
     "duplicate detection, and human-in-the-loop review, in one queue.</div>",
@@ -384,7 +388,9 @@ st.markdown(
 # ============================================================
 
 with st.sidebar:
-    st.markdown('<div class="section-label">Submit a ticket</div>', unsafe_allow_html=True)
+    st.markdown(
+        '<div class="section-label">Submit a ticket</div>', unsafe_allow_html=True
+    )
 
     subject = st.text_input("Subject", placeholder="e.g. I cannot access my account")
     body = st.text_area(
@@ -396,7 +402,9 @@ with st.sidebar:
             st.warning("Add a subject and a message before running triage.")
         else:
             try:
-                with st.spinner("Classifying, checking for duplicates, drafting a reply..."):
+                with st.spinner(
+                    "Classifying, checking for duplicates, drafting a reply..."
+                ):
                     data = api(
                         "/tickets",
                         "post",
@@ -445,7 +453,9 @@ except Exception as e:
 
 st.markdown('<div class="section-label">Overview</div>', unsafe_allow_html=True)
 
-high_critical = stats["priorities"].get("high", 0) + stats["priorities"].get("critical", 0)
+high_critical = stats["priorities"].get("high", 0) + stats["priorities"].get(
+    "critical", 0
+)
 human_review = stats["statuses"].get("needs_human_review", 0)
 
 render_kpis(
@@ -470,8 +480,12 @@ with analytics_col1:
     st.markdown("**Categories**")
     categories = stats.get("categories", {})
     if categories:
-        for category, count in sorted(categories.items(), key=lambda x: x[1], reverse=True):
-            render_bar(category.replace("_", " ").title(), count, stats["total"], "#3A4150")
+        for category, count in sorted(
+            categories.items(), key=lambda x: x[1], reverse=True
+        ):
+            render_bar(
+                category.replace("_", " ").title(), count, stats["total"], "#3A4150"
+            )
     else:
         render_alert("No category data yet.", "muted")
 
@@ -494,7 +508,9 @@ st.markdown('<div class="section-label">Ticket inbox</div>', unsafe_allow_html=T
 filter_col1, filter_col2, filter_col3, filter_col4 = st.columns(4)
 
 with filter_col1:
-    category_options = ["All"] + sorted({(t.get("category") or "other") for t in tickets})
+    category_options = ["All"] + sorted(
+        {(t.get("category") or "other") for t in tickets}
+    )
     selected_category = st.selectbox("Category", category_options)
 
 with filter_col2:
@@ -516,13 +532,23 @@ with filter_col4:
 filtered_tickets = tickets
 
 if selected_category != "All":
-    filtered_tickets = [t for t in filtered_tickets if (t.get("category") or "other") == selected_category]
+    filtered_tickets = [
+        t
+        for t in filtered_tickets
+        if (t.get("category") or "other") == selected_category
+    ]
 
 if selected_priority != "All":
-    filtered_tickets = [t for t in filtered_tickets if (t.get("priority") or "medium") == selected_priority]
+    filtered_tickets = [
+        t
+        for t in filtered_tickets
+        if (t.get("priority") or "medium") == selected_priority
+    ]
 
 if selected_status != "All":
-    filtered_tickets = [t for t in filtered_tickets if (t.get("status") or "unknown") == selected_status]
+    filtered_tickets = [
+        t for t in filtered_tickets if (t.get("status") or "unknown") == selected_status
+    ]
 
 if search.strip():
     search_text = search.lower()
@@ -554,15 +580,17 @@ else:
         dot = PRIORITY_DOTS.get(priority, "⚪")
 
         title = (
-        f"{dot}  #{ticket['id']}  ·  "
-        f"{priority.title()}  ·  "
-        f"{category.replace('_', ' ').title()}  ·  "
-        f"{subject}"
-)
+            f"{dot}  #{ticket['id']}  ·  "
+            f"{priority.title()}  ·  "
+            f"{category.replace('_', ' ').title()}  ·  "
+            f"{subject}"
+        )
 
         with st.expander(title):
             confidence = ticket.get("confidence")
-            confidence_display = f"{confidence:.2f}" if confidence is not None else "N/A"
+            confidence_display = (
+                f"{confidence:.2f}" if confidence is not None else "N/A"
+            )
 
             render_stats(
                 [
@@ -573,10 +601,15 @@ else:
                 ]
             )
 
-            st.markdown('<div class="field-label">Customer message</div>', unsafe_allow_html=True)
+            st.markdown(
+                '<div class="field-label">Customer message</div>',
+                unsafe_allow_html=True,
+            )
             st.write(ticket.get("body") or "(no message)")
 
-            st.markdown('<div class="field-label">Triage analysis</div>', unsafe_allow_html=True)
+            st.markdown(
+                '<div class="field-label">Triage analysis</div>', unsafe_allow_html=True
+            )
             analysis1, analysis2 = st.columns(2)
 
             with analysis1:
@@ -587,15 +620,25 @@ else:
 
             with analysis2:
                 if ticket.get("duplicate_of"):
-                    render_alert(f"Likely duplicate of ticket #{ticket['duplicate_of']}", "critical")
+                    render_alert(
+                        f"Likely duplicate of ticket #{ticket['duplicate_of']}",
+                        "critical",
+                    )
                 else:
                     render_alert("No likely duplicate detected.", "success")
 
-            st.markdown('<div class="field-label">Draft reply</div>', unsafe_allow_html=True)
-            render_alert(ticket.get("draft_reply") or "No draft reply available.", "muted")
+            st.markdown(
+                '<div class="field-label">Draft reply</div>', unsafe_allow_html=True
+            )
+            render_alert(
+                ticket.get("draft_reply") or "No draft reply available.", "muted"
+            )
 
             if status == "needs_human_review":
-                st.markdown('<div class="field-label">Needs attention</div>', unsafe_allow_html=True)
+                st.markdown(
+                    '<div class="field-label">Needs attention</div>',
+                    unsafe_allow_html=True,
+                )
                 render_alert(
                     "This ticket needs human review. Triage confidence was below the "
                     "configured threshold, or the LLM was unavailable when it ran.",
