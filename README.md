@@ -1,6 +1,6 @@
 # Ticket Triage Agent
 
-A portfolio-grade support ticket triage system that ingests tickets, classifies them, scores priority, detects sentiment and semantic duplicates, suggests routing, drafts a first response, logs confidence, and supports human feedback and evaluation.
+A ticket triage system that ingests tickets, classifies them, scores priority, detects sentiment and semantic duplicates, suggests routing, drafts a first response, logs confidence, and supports human feedback and evaluation.
 
 ## Architecture
 
