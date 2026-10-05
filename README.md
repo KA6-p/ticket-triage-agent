@@ -6,7 +6,7 @@ A ticket triage system that ingests tickets, classifies them, scores priority, d
 
 ```text
 Ticket Source -> FastAPI -> preprocessing
-                    |-> Claude classification/priority/draft
+                    |-> classification/priority/draft
                     |-> sentence-transformers -> ChromaDB -> similarity
                     |-> deterministic priority guardrails
                     v
